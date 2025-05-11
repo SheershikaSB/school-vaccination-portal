@@ -53,6 +53,14 @@ npm install
 npm run dev
 ```
 
+
+To check the swagger documentation
+After starting Backend, go to the following URL
+
+```bash
+http://localhost:5000/api-docs/
+```
+
 ### Start Frontend
 
 ```bash
