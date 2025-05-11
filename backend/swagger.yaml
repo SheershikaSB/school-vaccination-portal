@@ -1,0 +1,309 @@
+openapi: 3.0.0
+info:
+  title: School Vaccination Portal API
+  version: 1.0.0
+  description: API documentation for the School Vaccination Portal
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local Development Server
+
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      description: Authenticates a user and returns a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: admin
+                password:
+                  type: string
+                  example: password123
+      responses:
+        200:
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        401:
+          description: Unauthorized (Invalid credentials)
+        500:
+          description: Internal Server Error
+
+  /students:
+    post:
+      summary: Add a New Student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                grade:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                vaccinated:
+                  type: boolean
+                vaccine_name:
+                  type: string
+                drive_name:
+                  type: string
+      responses:
+        201:
+          description: Student added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  studentId:
+                    type: integer
+        500:
+          description: Internal Server Error
+
+    get:
+      summary: List Students
+      parameters:
+        - name: search
+          in: query
+          description: Search term (name, grade, or ID)
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+                    grade:
+                      type: string
+                    dob:
+                      type: string
+                    vaccination_status:
+                      type: string
+        500:
+          description: Internal Server Error
+
+  /students/{id}:
+    get:
+      summary: Get Student Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Student details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  student:
+                    type: object
+                  vaccinations:
+                    type: array
+                    items:
+                      type: object
+        404:
+          description: Student not found
+        500:
+          description: Internal Server Error
+
+    put:
+      summary: Update Student Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                grade:
+                  type: string
+                dob:
+                  type: string
+                  format: date
+                vaccinated:
+                  type: boolean
+                vaccine_name:
+                  type: string
+      responses:
+        200:
+          description: Student updated successfully
+        404:
+          description: Student not found
+        500:
+          description: Internal Server Error
+
+  /students/bulk-upload:
+    post:
+      summary: Bulk Import Students
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        200:
+          description: Bulk import successful
+        500:
+          description: Internal Server Error
+
+  /drives:
+    post:
+      summary: Create a New Vaccination Drive
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                drive_name:
+                  type: string
+                vaccine_name:
+                  type: string
+                drive_date:
+                  type: string
+                  format: date
+                available_doses:
+                  type: integer
+                applicable_grades:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        201:
+          description: Drive created successfully
+        500:
+          description: Internal Server Error
+
+    get:
+      summary: List Vaccination Drives
+      responses:
+        200:
+          description: List of drives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        500:
+          description: Internal Server Error
+
+  /drives/{id}:
+    put:
+      summary: Update Drive Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                drive_name:
+                  type: string
+                vaccine_name:
+                  type: string
+                drive_date:
+                  type: string
+                  format: date
+                available_doses:
+                  type: integer
+                applicable_grades:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: Drive updated successfully
+        404:
+          description: Drive not found
+        500:
+          description: Internal Server Error
+
+  /reports:
+    get:
+      summary: Fetch Vaccination Reports
+      parameters:
+        - name: vaccine_name
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        200:
+          description: List of vaccination records
+          content:
+            application/json:
+              schema:
+                type: object
+        500:
+          description: Internal Server Error
+
+  /reports/export:
+    get:
+      summary: Export Vaccination Data
+      responses:
+        200:
+          description: CSV file download
+        500:
+          description: Internal Server Error
